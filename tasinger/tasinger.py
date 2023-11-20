@@ -1,24 +1,16 @@
-import importlib
 import re
-
-import gradio as gr
-import yaml
-from gradio import Textbox, Dropdown
 from utils.hparams import set_hparams
 from utils.hparams import hparams as hp
 import numpy as np
-
 import os
-
 import torch
 import numpy as np
 from modules.hifigan.hifigan import HifiGanGenerator
-from vocoders.hifigan import HifiGAN
 
 from utils import load_ckpt
 from utils.hparams import set_hparams, hparams
 from utils.text_encoder import TokenTextEncoder
-from pypinyin import pinyin, lazy_pinyin, Style
+from pypinyin import lazy_pinyin
 import librosa
 import glob
 
@@ -26,7 +18,6 @@ from usr.diff.shallow_diffusion_tts import GaussianDiffusion
 from usr.diffsinger_task import DIFF_DECODERS
 from modules.fastspeech.pe import PitchExtractor
 import utils
-import torch.nn as nn
 
 def pinyin2ph_func():
     pinyin2phs = {'AP': '<AP>', 'SP': '<SP>'}
@@ -293,26 +284,6 @@ class E2EInfer:
         f_name = inp['spk_name'] + ' | ' + inp['text']
         save_wav(out, f'infer_out/{f_name}.wav', hparams['audio_sample_rate'])
 
-# if __name__ == '__main__':
-#     inp = {
-#         'spk_name': 'Tenor-1',
-#         'text': 'AP你要相信AP相信我们会像童话故事里AP',
-#         'notes': 'rest | G#3 | A#3 C4 | D#4 | D#4 F4 | rest | E4 F4 | F4 | D#4 A#3 | A#3 | A#3 | C#4 | B3 C4 | C#4 | B3 C4 | A#3 | G#3 | rest',
-#         'notes_duration': '0.14 | 0.47 | 0.1905 0.1895 | 0.41 | 0.3005 0.3895 | 0.21 | 0.2391 0.1809 | 0.32 | 0.4105 0.2095 | 0.35 | 0.43 | 0.45 | 0.2309 0.2291 | 0.48 | 0.225 0.195 | 0.29 | 0.71 | 0.14',
-#         'input_type': 'word',
-#     } 
-
-#     c = {
-#         'spk_name': 'Tenor-1',
-#         'text': '你要相信相信我们会像童话故事里',
-#         'ph_seq': '<AP> n i iao iao x iang x in in <AP> x iang iang x in uo uo m en h uei x iang t ong ong h ua g u u sh i l i <AP>',
-#         'note_seq': 'rest G#3 G#3 A#3 C4 D#4 D#4 D#4 D#4 F4 rest E4 E4 F4 F4 F4 D#4 A#3 A#3 A#3 A#3 A#3 C#4 C#4 B3 B3 C4 C#4 C#4 B3 B3 C4 A#3 A#3 G#3 G#3 rest',
-#         'note_dur_seq': '0.14 0.47 0.47 0.1905 0.1895 0.41 0.41 0.3005 0.3005 0.3895 0.21 0.2391 0.2391 0.1809 0.32 0.32 0.4105 0.2095 0.35 0.35 0.43 0.43 0.45 0.45 0.2309 0.2309 0.2291 0.48 0.48 0.225 0.225 0.195 0.29 0.29 0.71 0.71 0.14',
-#         'is_slur_seq': '0 0 0 0 1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0',
-#         'input_type': 'phoneme'
-#     }
-#     DiffSingerE2EInfer.example_run(inp)
-
 
 class TASinger:
     def __init__(self, exp_name):
@@ -354,42 +325,3 @@ class TASinger:
                 n = ""
         audio_outs = np.concatenate(audio_outs)
         return hp['audio_sample_rate'], audio_outs
-        # return audio_outs  # error!
-
-#     def run(self):
-#         set_hparams(config=f'checkpoints/{self.exp_name}/config.yaml', exp_name=self.exp_name, print_hparams=False)
-#         self.infer_ins = E2EInfer(hp)
-#         example_inputs = self.example_inputs
-#         for i in range(len(example_inputs)):
-#             singer, text, notes, notes_dur = example_inputs[i].split('<sep>')
-#             example_inputs[i] = [singer, text, notes, notes_dur]
-
-#         singerList = \
-#             [
-#             'Tenor-1', 'Tenor-2', 'Tenor-3', 'Tenor-4', 'Tenor-5', 'Tenor-6', 'Tenor-7',
-#             'Alto-1', 'Alto-2', 'Alto-3', 'Alto-4', 'Alto-5', 'Alto-6', 'Alto-7',
-#             'Soprano-1', 'Soprano-2', 'Soprano-3',
-#             'Bass-1',  'Bass-2',  'Bass-3',
-#             ]
-
-#         iface = gr.Interface(fn=self.greet,
-#                              inputs=[
-#                                  Dropdown(choices=singerList, value=example_inputs[0][0], label="SingerID"),
-#                                  Textbox(lines=2, placeholder=None, value=example_inputs[0][1], label="input text"),
-#                                  Textbox(lines=2, placeholder=None, value=example_inputs[0][2], label="input note"),
-#                                  Textbox(lines=2, placeholder=None, value=example_inputs[0][3], label="input duration")],
-#                              outputs="audio",
-#                              allow_flagging="never",
-#                              title=self.title,
-#                              description=self.description,
-#                              article=self.article,
-#                              examples=example_inputs)
-#                             # enable_queue=True
-#                             # cache_examples=True
-#         iface.launch()
-#         # iface.launch(share=True)
-
-# if __name__ == '__main__':
-#     gradio_config = yaml.safe_load(open('tasinger/gradio/gradio_settings.yaml'))
-#     g = GradioInfer(**gradio_config)
-#     g.run()

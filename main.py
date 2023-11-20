@@ -3,7 +3,6 @@ from analyzer.analyzer import analyze
 from tasinger.tasinger import TASinger
 
 tasinger = TASinger("m4singer_diff_e2e")
-# export PYTHONPATH="${PYTHONPATH}:$(cd ..; pwd)"
 
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
     if mode == "Audio":
