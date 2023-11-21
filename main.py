@@ -1,13 +1,13 @@
 import gradio as gr
 from analyzer.analyzer import analyze
-# from tasinger.tasinger import TASinger
+from tasinger.tasinger import TASinger
 
-# tasinger = TASinger("m4singer_diff_e2e")
+tasinger = TASinger("m4singer_diff_e2e")
 
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
     if mode == "Audio":
-        # audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
-        return #audio, None
+        audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
+        return audio, None
     else:
         video = generate_video(singer, sheet_text, sheet_note, sheet_duration)
         return None, video
