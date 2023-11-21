@@ -6,6 +6,7 @@ import glob
 import os
 import csv
 import matplotlib.pyplot as plt
+import matplotlib
 from io import BytesIO
 import librosa
 
@@ -13,6 +14,7 @@ import tensorflow as tf
 from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
 
+matplotlib.rcParams['font.family'] = 'SimHei'
 basic_pitch_model = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
 
 
@@ -74,15 +76,20 @@ def calculate_score(standard, user, threshold=3):
 def convert_data(data):
     result = []
     current_time = 0.0
-
+    res2 = []
     for key, (lyric, pitches, durations) in data.items():
+        rec1 = 0
+        count =0
         for pitch, duration in zip(pitches, durations):
             start_time = current_time
+            if count == 0:
+                rec1 = start_time
             end_time = start_time + float(duration)
             result.append((pitch, start_time, end_time))
-            current_time += float(duration)
 
-    return result
+            current_time += float(duration)
+        res2.append((lyric, rec1, current_time))
+    return result, res2
 
 
 def calculate_accuracy(sheet_music, user_singing, time_tolerance1, time_tolerance2, threshold):
@@ -111,7 +118,7 @@ def calculate_accuracy(sheet_music, user_singing, time_tolerance1, time_toleranc
     return round(pitch_accuracy, 2), round(rhythm_accuracy, 2), round(duration_accuracy, 2)
 
 
-def visualize(standard, user):
+def visualize(stan,standard, user):
     times = []
     pitches = []
     for pitch, start, end in user:
@@ -124,8 +131,15 @@ def visualize(standard, user):
             continue
         times2.extend([start, end])
         pitches2.extend([pitch, pitch])
-
     plt.figure(figsize=(8, 4))
+    for lyric, start, end in stan:
+        for pitch1, start1, end1 in standard:
+            if start == start1:
+                if lyric != "AP" and lyric != "SP":
+                    plt.text(start, pitch1, lyric, fontsize=15)
+                    break
+                    # print(lyric, start, pitch1)
+
     plt.plot(times, pitches, marker='o', color='red')
     plt.plot(times2, pitches2, marker='o', color='blue')
     plt.legend(['User Singing', 'Reference'])
@@ -176,7 +190,7 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
             user_notes.append((pitch_midi, start_time_s, end_time_s))
     user_notes = sorted(user_notes, key=lambda x: x[1])
 
-    standard_notes = convert_data(standard)
+    standard_notes,standard_lyrics = convert_data(standard)
     user_start_time = user_notes[0][1]
     standard_start_time = standard_notes[0][2]
     for i in range(len(user_notes)):
@@ -184,7 +198,7 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
                          user_notes[i][2] - user_start_time + standard_start_time)
     score = calculate_score(standard_notes, user_notes, threshold=threshold1)
     score = round(score * 100, 2)
-    visualizations = visualize(standard_notes, user_notes)
+    visualizations = visualize(standard_lyrics,standard_notes, user_notes)
 
     pitch_accuracy, rhythm_accuracy, duration_accuracy = calculate_accuracy(standard_notes, user_notes, time_tolerance1=tolerance1,
                                                                             time_tolerance2=tolerance2,

@@ -1,13 +1,13 @@
 import gradio as gr
 from analyzer.analyzer import analyze
-from tasinger.tasinger import TASinger
+# from tasinger.tasinger import TASinger
 
-tasinger = TASinger("m4singer_diff_e2e")
+# tasinger = TASinger("m4singer_diff_e2e")
 
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
     if mode == "Audio":
-        audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
-        return audio, None
+        # audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
+        return #audio, None
     else:
         video = generate_video(singer, sheet_text, sheet_note, sheet_duration)
         return None, video
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         with gr.Row():
             with gr.Column(scale=1):
                 '''input of audio file'''
-                audio_file = gr.Audio(scale=1, type="filepath", label="Upload or Record Your Audio File Here", min_length=3, container=True)
+                audio_file = gr.Audio(scale=1, type="filepath", label="Upload or Record Your Audio File Here", min_length=3)
                 '''input of standard music sheet'''
                 sheet_text = gr.Textbox(scale=2, lines=2, label="Input Music Sheet Texts Here")
                 sheet_note = gr.Textbox(scale=2, lines=2, label="Input Music Sheet Notes Here")
@@ -96,4 +96,4 @@ if __name__ == "__main__":
                           user_total_duration, reference_total_notes, reference_total_duration])
         b2.click(generate, inputs=[sheet_text, sheet_note, sheet_duration, drop1, drop2], outputs=[standard_audio, audio_visualization])
 
-    vts.launch(share=True)
+    vts.launch()
