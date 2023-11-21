@@ -6,7 +6,7 @@ tasinger = TASinger("m4singer_diff_e2e")
 
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
     if mode == "Audio":
-        audio = tasinger.singing(singer, sheet_text, sheet_note, sheet_duration)
+        audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
         return audio, None
     else:
         video = generate_video(singer, sheet_text, sheet_note, sheet_duration)
@@ -76,9 +76,7 @@ if __name__ == "__main__":
                                 components=[score, ana_visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy])
             b1 = gr.Button(scale=1, value="Analyze My Audio")
 
-        singers = ['Tenor-1', 'Tenor-2', 'Tenor-3', 'Tenor-4', 'Tenor-5', 'Tenor-6', 'Tenor-7',
-                   'Alto-1', 'Alto-2', 'Alto-3', 'Alto-4', 'Alto-5', 'Alto-6', 'Alto-7',
-                   'Soprano-1', 'Soprano-2', 'Soprano-3', 'Bass-1',  'Bass-2',  'Bass-3']
+        singers = ['Tenor', 'Soprano', 'Bass', 'Alto']
         modes = ["Audio", "Video"]
 
         gr.Label("🎵🎙 Reference Generation Module 🎶", show_label=False)

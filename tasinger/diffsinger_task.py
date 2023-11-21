@@ -11,10 +11,10 @@ from modules.fastspeech.fs2 import FastSpeech2
 from modules.diffsinger_midi.fs2 import FastSpeech2MIDI
 from modules.fastspeech.tts_modules import mel2ph_to_dur
 
-from usr.diff.candidate_decoder import FFT
+from tasinger.diff.candidate_decoder import FFT
 from utils.pitch_utils import denorm_f0
-from tasks.tts.fs2_utils import FastSpeechDataset
-from tasks.tts.fs2 import FastSpeech2Task
+from tasinger.tts.fs2_utils import FastSpeechDataset
+from tasinger.tts.fs2 import FastSpeech2Task
 
 import numpy as np
 import os

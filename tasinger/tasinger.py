@@ -14,8 +14,8 @@ from pypinyin import lazy_pinyin
 import librosa
 import glob
 
-from usr.diff.shallow_diffusion_tts import GaussianDiffusion
-from usr.diffsinger_task import DIFF_DECODERS
+from tasinger.diff.shallow_diffusion_tts import GaussianDiffusion
+from tasinger.diffsinger_task import DIFF_DECODERS
 from modules.fastspeech.pe import PitchExtractor
 import utils
 
@@ -290,7 +290,6 @@ class TASinger:
         self.exp_name = exp_name
         set_hparams(config=f'checkpoints/{self.exp_name}/config.yaml', exp_name=self.exp_name, print_hparams=False)
         self.infer_ins = E2EInfer(hp)
-        print('TASinger init done.')
 
     def singing(self, singer, text, notes, notes_duration):
         PUNCS = '。？；：'

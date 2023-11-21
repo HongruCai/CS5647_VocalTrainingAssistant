@@ -1,5 +1,5 @@
 base_config:
-  - usr/configs/popcs_ds_beta6.yaml
+  - tasinger/configs/popcs_ds_beta6.yaml
 binarizer_cls: data_gen.singing.binarize.M4SingerBinarizer
 
 raw_data_dir: 'data/raw/m4singer'

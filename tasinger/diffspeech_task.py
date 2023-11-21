@@ -7,7 +7,7 @@ from .diff.shallow_diffusion_tts import GaussianDiffusion
 from .task import DiffFsTask
 from vocoders.base_vocoder import get_vocoder_cls, BaseVocoder
 from utils.pitch_utils import denorm_f0
-from tasks.tts.fs2_utils import FastSpeechDataset
+from tasinger.tts.fs2_utils import FastSpeechDataset
 
 DIFF_DECODERS = {
     'wavenet': lambda hp: DiffNet(hp['audio_num_mel_bins']),

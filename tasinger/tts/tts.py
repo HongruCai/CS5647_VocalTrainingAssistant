@@ -13,7 +13,7 @@ import numpy as np
 from tqdm import tqdm
 import torch.distributed as dist
 
-from tasks.base_task import BaseTask
+from tasinger.tts.base import BaseTask
 from utils.hparams import hparams
 from utils.text_encoder import TokenTextEncoder
 import json
@@ -22,7 +22,6 @@ import torch
 import torch.optim
 import torch.utils.data
 import utils
-
 
 
 class TtsTask(BaseTask):

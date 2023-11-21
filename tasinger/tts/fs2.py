@@ -4,8 +4,8 @@ matplotlib.use('Agg')
 
 from utils import audio
 import matplotlib.pyplot as plt
-from data_gen.tts.data_gen_utils import get_pitch
-from tasks.tts.fs2_utils import FastSpeechDataset
+from utils.pitch_utils import get_pitch
+from tasinger.tts.fs2_utils import FastSpeechDataset
 from utils.cwt import cwt2f0
 from utils.pl_utils import data_loader
 import os
@@ -16,7 +16,7 @@ from utils.hparams import hparams
 from utils.plot import spec_to_figure, dur_to_figure, f0_to_figure
 from utils.pitch_utils import denorm_f0
 from modules.fastspeech.fs2 import FastSpeech2
-from tasks.tts.tts import TtsTask
+from tasinger.tts.tts import TtsTask
 import torch
 import torch.optim
 import torch.utils.data

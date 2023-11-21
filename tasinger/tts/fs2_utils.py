@@ -11,7 +11,7 @@ import torch.utils.data
 from utils.indexed_datasets import IndexedDataset
 from utils.pitch_utils import norm_interp_f0
 import numpy as np
-from tasks.base_task import BaseDataset
+from tasinger.tts.base import BaseDataset
 import torch
 import torch.optim
 import torch.utils.data

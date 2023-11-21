@@ -1,5 +1,5 @@
 base_config:
-  - usr/configs/m4singer/base.yaml
+  - tasinger/configs/m4singer/base.yaml
 
 use_midi: true  #  for midi exp
 use_gt_f0: false  #  for midi exp
