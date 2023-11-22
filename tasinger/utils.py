@@ -154,6 +154,7 @@ def cwt2f0(cwt_spec, mean, std, cwt_scales):
         f0 = np.exp(f0)  # [B, T]
     return f0
 
+
 def tensors_to_scalars(metrics):
     new_metrics = {}
     for k, v in metrics.items():
@@ -293,8 +294,8 @@ def make_positions(tensor, padding_idx):
     # how to handle the dtype kwarg in cumsum.
     mask = tensor.ne(padding_idx).int()
     return (
-                   torch.cumsum(mask, dim=1).type_as(mask) * mask
-           ).long() + padding_idx
+            torch.cumsum(mask, dim=1).type_as(mask) * mask
+    ).long() + padding_idx
 
 
 def softmax(x, dim):
@@ -321,8 +322,12 @@ def load_ckpt(cur_model, ckpt_base_dir, prefix_in_ckpt='model', force=True, stri
         checkpoint_path = [ckpt_base_dir]
     else:
         base_dir = ckpt_base_dir
-        checkpoint_path = sorted(glob.glob(f'{base_dir}/model_ckpt_steps_*.ckpt'), key=
-        lambda x: int(re.findall(f'{base_dir}/model_ckpt_steps_(\d+).ckpt', x)[0]))
+        pattern = "model_ckpt_steps_*.ckpt"
+        search_pattern = os.path.join(base_dir, pattern)
+        checkpoint_path = sorted(
+            glob.glob(search_pattern),
+            key=lambda x: int(re.findall(r"model_ckpt_steps_(\d+).ckpt", os.path.basename(x))[0])
+        )
     if len(checkpoint_path) > 0:
         checkpoint_path = checkpoint_path[-1]
         state_dict = torch.load(checkpoint_path, map_location="cpu")["state_dict"]
@@ -396,7 +401,6 @@ alpha = 0.45
 en_floor = 10 ** (-80 / 20)
 FFT_SIZE = 2048
 
-
 f0_bin = 256
 f0_max = 1100.0
 f0_min = 50.0
@@ -459,6 +463,7 @@ def denorm_f0(f0, uv, hparams, pitch_padding=None, min=None, max=None):
     if pitch_padding is not None:
         f0[pitch_padding] = 0
     return f0
+
 
 def get_pitch(wav_data, mel, hparams):
     """

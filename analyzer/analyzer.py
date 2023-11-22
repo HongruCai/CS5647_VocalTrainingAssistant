@@ -1,4 +1,3 @@
-import whisper
 from basic_pitch.inference import predict_and_save
 import mido
 import pandas as pd
@@ -28,13 +27,6 @@ def melody_analysis_and_save(file_list, output_dir):
         save_notes=True,
         model_path=ICASSP_2022_MODEL_PATH,
     )
-
-
-def get_lyrics(audio_file):
-    model = whisper.load_model("base")
-    audio_path = audio_file
-    result = model.transcribe(audio_path)
-    return result["text"]
 
 
 def note_to_midi(note):

@@ -15,4 +15,3 @@ six
 tensorflow
 torch
 tqdm
-whisper

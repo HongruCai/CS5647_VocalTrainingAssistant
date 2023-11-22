@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import glob
 import librosa
-
+import os
 from tasinger.utils import load_ckpt
 from tasinger.hparams import set_hparams, hparams
 from tasinger.text_encoder import TokenTextEncoder
@@ -96,8 +96,14 @@ class TASinger:
     def build_vocoder(self):
         base_dir = hparams['vocoder_ckpt']
         config_path = f'{base_dir}/config.yaml'
-        ckpt = sorted(glob.glob(f'{base_dir}/model_ckpt_steps_*.ckpt'), key=
-        lambda x: int(re.findall(f'{base_dir}/model_ckpt_steps_(\d+).ckpt', x)[0]))[-1]
+        pattern = "model_ckpt_steps_*.ckpt"
+        search_pattern = os.path.join(base_dir, pattern)
+        ckpt = sorted(
+            glob.glob(search_pattern),
+            key=lambda x: int(re.findall(r"model_ckpt_steps_(\d+).ckpt", os.path.basename(x))[0])
+        )[-1]
+        # ckpt = sorted(glob.glob(f'{base_dir}/model_ckpt_steps_*.ckpt'), key=
+        # lambda x: int(re.findall(f'{base_dir}/model_ckpt_steps_(\d+).ckpt', x)[0]))[-1]
         print('| load HifiGAN: ', ckpt)
         ckpt_dict = torch.load(ckpt, map_location="cpu")
         config = set_hparams(config_path, global_hparams=False)
