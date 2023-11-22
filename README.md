@@ -73,5 +73,6 @@ We agree to the license: CC BY-NC-SA 4.0 (NonCommercial!).
 This project uses the following tools or repositories:
 
 * [gradio-app](https://www.gradio.app/)
+* [basic-pitch](https://github.com/spotify/basic-pitch)
 * [m4singer](https://github.com/M4Singer/M4Singer)
 * TODO
