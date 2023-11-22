@@ -70,12 +70,12 @@ if __name__ == "__main__":
                         duration_accuracy = gr.Textbox(scale=1, lines=1, label="Duration Accuracy (%)")
         '''parameters for analyzer'''
         with gr.Row():
-            velocity = gr.Slider(scale=1, minimum=0, maximum=100, step=5, label="Minimum Velocity to Take as Start", value=40)
+            velocity = gr.Slider(scale=1, minimum=0, maximum=100, step=5, label="Minimum Velocity to Take as Start", value=20)
             score_mode = gr.Dropdown(label="Score Mode", value="Reference Pitch", choices=["Reference Pitch", "Pitch Shift"])
-            threshold1 = gr.Slider(scale=1, minimum=0, maximum=5, step=1, label="Tolerance of Pitch when Calculating Score", value=2)
+            threshold1 = gr.Slider(scale=1, minimum=0, maximum=5, step=1, label="Tolerance of Pitch when Calculating Score", value=1)
         with gr.Row():
             threshold2 = gr.Slider(scale=1, minimum=0, maximum=5, step=1, label="Tolerance of Pitch when Calculating Pitch Accuracy",
-                                   value=2)
+                                   value=1)
             tolerance1 = gr.Slider(scale=1, minimum=0, maximum=0.5, step=0.05,
                                    label="Tolerance of Time when Calculating Rhythm Accuracy (s)",
                                    value=0.1)
@@ -107,7 +107,20 @@ if __name__ == "__main__":
         gr.Examples(fn=analyze, inputs=[audio_file, sheet_text, sheet_note, sheet_duration],
                     examples=examples, label="Some Examples to Start With")
 
-        gr.Markdown("## Examples to Start With")
+        gr.Markdown(
+            '''## Detailed Explanation of Parameters
+            ### Singing Analysis Module
+            - **Velocity**: When the volume of a certain pitch is greater than threshold, will be regarded as the beginning of the user's singing, default to 20
+            - **Score Mode**: Two modes to calculate overall score, Reference Pitch means demand the user singing pitches exactly same to reference pitches
+            , Pitch Shift allows pitch shift
+            - **Tolerance of Pitch when Calculating Score**: abs(user_pitch-reference_pitch) <= tolerance are all valid, default to 1
+            - **Tolerance of Pitch when Calculating Pitch Accuracy**: abs(single_user_pitch-single_reference_pitch) <= tolerance are all valid, default to 1
+            - **Tolerance of Time when Calculating Rhythm Accuracy**: abs(user_start_time - reference_start_time) <= time_tolerance, default to 0.1
+            - **Tolerance of Time when Calculating Duration Accuracy**: abs(user_duration - reference_duration) <= time_tolerance, default to 0.1
+            ### Reference Generation Module
+            - **Select a Singer**: Select a singer to generate reference, default to Tenor
+            - **Select Audio or Video to Generate**: Select to generate audio or video, default to Audio
+                    ''')
         '''button functions'''
         b1.click(analyze,
                  inputs=[audio_file, sheet_text, sheet_note, sheet_duration, threshold1, threshold2, tolerance1, tolerance2, velocity,
