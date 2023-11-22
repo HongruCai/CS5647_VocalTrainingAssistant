@@ -1,3 +1,8 @@
+'''
+This file is used to analyze the user singing and calculate the score and accuracy.
+Author: Cai Hongru
+'''
+
 from basic_pitch.inference import predict_and_save
 import mido
 import pandas as pd
@@ -16,7 +21,7 @@ from basic_pitch import ICASSP_2022_MODEL_PATH
 matplotlib.rcParams['font.family'] = 'SimHei'
 basic_pitch_model = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
 
-
+'''use pitch basic to analyze the audio file and save the output to the output_dir'''
 def melody_analysis_and_save(file_list, output_dir):
     predict_and_save(
         file_list,
@@ -29,6 +34,7 @@ def melody_analysis_and_save(file_list, output_dir):
     )
 
 
+'''transform the note to midi number'''
 def note_to_midi(note):
     rec = []
     for item in note:
@@ -41,6 +47,7 @@ def note_to_midi(note):
     return rec
 
 
+'''calculate the score of the user singing by comparing the standard and user singing notes in the same time interval'''
 def calculate_score(standard, user, threshold=3):
     i = 0
     score = 0
@@ -65,6 +72,7 @@ def calculate_score(standard, user, threshold=3):
     return score / (standard[-1][-1] / 0.00001)
 
 
+'''convert the standard music sheet to the format of (pitch, start_time, end_time)'''
 def convert_data(data):
     result = []
     current_time = 0.0
@@ -84,6 +92,7 @@ def convert_data(data):
     return result, res2
 
 
+'''calculate the accuracy of pitch, rhythm and duration'''
 def calculate_accuracy(sheet_music, user_singing, time_tolerance1, time_tolerance2, threshold):
     pitch_matches = 0
     rhythm_matches = 0
@@ -110,6 +119,7 @@ def calculate_accuracy(sheet_music, user_singing, time_tolerance1, time_toleranc
     return round(pitch_accuracy, 2), round(rhythm_accuracy, 2), round(duration_accuracy, 2)
 
 
+'''visualize the standard and user singing notes'''
 def visualize(stan,standard, user):
     times = []
     pitches = []
@@ -142,6 +152,7 @@ def visualize(stan,standard, user):
     return plt
 
 
+'''main function to analyze the user singing, calculate the score and accuracy and visualize the result'''
 def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, threshold2, tolerance1, tolerance2):
     output_dir = 'resources/intermediate_files'
     melody_analysis_and_save([audio_file], output_dir)
@@ -198,18 +209,3 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
     os.remove(notes_file[0])
     return score, visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy, len(user_notes), round(user_notes[-1][2],2), len(
         standard_notes), round(standard_notes[-1][2],2)
-
-# if __name__ == "__main__":
-#     examples = [
-#         ['resources/examples/example1.wav', 'AP你要相信AP相信我们会像童话故事里AP',
-#          'rest | G#3 | A#3 C4 | D#4 | D#4 F4 | rest | E4 F4 | F4 | D#4 A#3 | A#3 | A#3 | C#4 | B3 C4 | C#4 | B3 C4 | A#3 | G#3 | rest',
-#          '0.14 | 0.47 | 0.1905 0.1895 | 0.41 | 0.3005 0.3895 | 0.21 | 0.2391 0.1809 | 0.32 | 0.4105 0.2095 | 0.35 | 0.43 | 0.45 | 0.2309 0.2291 | 0.48 | 0.225 0.195 | 0.29 | 0.71 | 0.14'],
-#         ['resources/examples/example2.wav', 'AP半醒着AP笑着哭着都快活AP',
-#          'rest | D4 | B3 | C4 D4 | rest | E4 | D4 | E4 | D4 | E4 | E4 F#4 | F4 F#4 | rest',
-#          '0.165 | 0.45 | 0.53 | 0.3859 0.2441 | 0.35 | 0.38 | 0.17 | 0.32 | 0.26 | 0.33 | 0.38 0.21 | 0.3309 0.9491 | 0.125'],
-#         ['resources/examples/example3.wav', 'SP一杯敬朝阳一杯敬月光AP',
-#          'rest | G#3 | G#3 | G#3 | G3 | G3 G#3 | G3 | C4 | C4 | A#3 | C4 | rest',
-#          '0.33 | 0.26 | 0.23 | 0.27 | 0.36 | 0.3159 0.4041 | 0.54 | 0.21 | 0.32 | 0.24 | 0.58 | 0.17']
-#     ]
-#     score, visualizations = analyze("../../resources/examples/example1.wav", examples[0][1],
-#                                                                            examples[0][2], examples[0][3],threshold=5)

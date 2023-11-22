@@ -1,52 +1,72 @@
-# TASinger
-### 1. Preparation
+# CS5647 Course Project: Vocal Training Assistant
 
-#### Data Preparation
-a) Download m4singer.zip, then unzip this file into `data/raw`.
+Team 9: Cai Hongru, Xiu Jingqiao, Zhou Zheng
 
-b) Run the following scripts to pack the dataset for training/inference.
+Vocal Training Assistant is an innovative tool designed to assist in vocal training using advanced machine learning models. It offers
+features for analyzing user singing performance and generating reference audio or video for practice.
 
-```sh
-export PYTHONPATH=.
-CUDA_VISIBLE_DEVICES=0 python data_gen/tts/bin/binarize.py --config usr/configs/m4singer/base.yaml
+## Table of Contents
+- [Modules](#modules)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [License](#license)
 
-# `data/binary/m4singer` will be generated.
+## Modules
+
+- Singing Analysis Module![ana.png](assets%2Fana.png)
+  - Analyze your singing performance by comparing it with standard music sheets.
+  - Overall score, pitch accuracy, rhythm accuracy and duration accuracy are provided.
+
+    
+- Reference Generation Module![gen.png](assets%2Fgen.png)
+  - TODO
+  - TODO
+
+## Features
+
+* **Singing Analysis**: Analyze your singing performance by comparing it with standard music sheets.
+* **Audio and Video Generation**: Generate reference audio or video based on input music sheets.
+* **Customization**: Choose different singers and modes for reference generation.
+* **Gradio Interface**: User-friendly Gradio interface for easy interaction.
+
+
+## Installation
+
+To get started with the Vocal Training Assistant, follow these installation steps:
+
+```bash
+# Clone the repository
+git clone https://github.com/HongruCai/CS5647_VocalTrainingAssistant.git
+
+# Navigate to the project directory
+cd CS5647_VocalTrainingAssistant
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-#### Vocoder Preparation
-We use the pre-trained [Vocoder](https://drive.google.com/file/d/10LD3sq_zmAibl379yTW5M-LXy2l_xk6h/view?usp=share_link)
-and [PitchExtractor](https://drive.google.com/file/d/19QtXNeqUjY3AjvVycEt3G83lXn2HwbaJ/view?usp=share_link). Please unzip this file into `checkpoints` before training your acoustic model.
+## Quick Start
 
-### 2. Training Example
-First, you need a pre-trained FFT-Singer checkpoint. You can use the pre-trained model, or train FFT-Singer from scratch, run:
-```sh
-CUDA_VISIBLE_DEVICES=0 python tasks/run.py --config usr/configs/m4singer/fs2.yaml --exp_name m4singer_fs2_e2e --reset
+To quickly start using the Vocal Training Assistant, run the following command:
+
+```bash
+python main.py
 ```
 
-Then, to train DiffSinger, run:
+## Usage
 
-```sh
-CUDA_VISIBLE_DEVICES=0 python tasks/run.py --config usr/configs/m4singer/diff.yaml --exp_name m4singer_diff_e2e --reset  
-```
+To use the Vocal Training Assistant, navigate through the Gradio interface. You can upload or record your audio, input music sheet details,
+and choose to analyze your singing or generate reference material.
 
 
-### 3. Inference from packed test set
-```sh
-CUDA_VISIBLE_DEVICES=0 python tasks/run.py --config usr/configs/m4singer/diff.yaml --exp_name m4singer_diff_e2e --infer
-```
+## License
 
-We also provide:
- - the pre-trained model of [DiffSinger](https://drive.google.com/file/d/1LsTnCNinx5tQaRlDSbbxoZYrgPwR3CgL/view?usp=share_link);
- - the pre-trained model of [FFT-Singer](https://drive.google.com/file/d/1JB1kwhQJT-hAMGF7Ykq2b7w95vuwksus/view?usp=share_link);
+We agree to the license: CC BY-NC-SA 4.0 (NonCommercial!).
 
-Remember to put the pre-trained models in `checkpoints` directory.
+This project uses the following tools or repositories:
 
-### 4. Inference from raw inputs
-The way to generate a single utterance. The generated audio can be found at `infer_out`.
-```sh
-python inference/m4singer/ds_e2e.py --config usr/configs/m4singer/diff.yaml --exp_name m4singer_diff_e2e
-```
-The way to start the service locally.
-```sh
-CUDA_VISIBLE_DEVICES=0 python inference/m4singer/gradio/infer.py
-```
+* [gradio-app](https://www.gradio.app/)
+* [m4singer](https://github.com/M4Singer/M4Singer)
+* TODO
