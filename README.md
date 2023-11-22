@@ -46,6 +46,11 @@ cd CS5647_VocalTrainingAssistant
 # Install dependencies
 pip install -r requirements.txt
 ```
+Download the checkpoint files:
+
+Download from [Google Drive](https://drive.google.com/file/d/1DxPb9xXYvObEuVGBEokWQBqM6G5R1Gql/view?usp=drive_link)
+and put them in the checkpoints folder.
+
 
 ## Quick Start
 
