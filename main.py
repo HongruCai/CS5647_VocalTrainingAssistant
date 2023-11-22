@@ -15,14 +15,11 @@ def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
         return None, video
 
 
-<<<<<<< HEAD
 '''main function to generate the reference video'''
 def generate_video(singer, sheet_text, sheet_note, sheet_duration):
     return "This is a test"
 
 
-=======
->>>>>>> 265a4e7e5bdbd28b1a795f45457fef1253f5e7a5
 if __name__ == "__main__":
     '''examples for testing and for users to start with'''
     examples = [
