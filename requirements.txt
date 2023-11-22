@@ -3,6 +3,7 @@ gradio
 librosa
 matplotlib
 mido
+moviepy
 numpy
 pandas
 praat-parselmouth

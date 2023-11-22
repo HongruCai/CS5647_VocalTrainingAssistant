@@ -1,24 +1,28 @@
 import gradio as gr
 from analyzer.analyzer import analyze
 from tasinger.tasinger import TASinger
+from visualizer.visualizer import generate_video
 
 tasinger = TASinger("m4singer_diff_e2e")
 
 '''main function to generate'''
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
+    audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
     if mode == "Audio":
-        audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
         return audio, None
     else:
-        video = generate_video(singer, sheet_text, sheet_note, sheet_duration)
+        video = generate_video(audio, sheet_text, sheet_note, sheet_duration)
         return None, video
 
 
+<<<<<<< HEAD
 '''main function to generate the reference video'''
 def generate_video(singer, sheet_text, sheet_note, sheet_duration):
     return "This is a test"
 
 
+=======
+>>>>>>> 265a4e7e5bdbd28b1a795f45457fef1253f5e7a5
 if __name__ == "__main__":
     '''examples for testing and for users to start with'''
     examples = [
