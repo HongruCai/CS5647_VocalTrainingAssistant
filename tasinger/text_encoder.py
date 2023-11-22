@@ -108,7 +108,7 @@ class ByteTextEncoder(TextEncoder):
     def encode(self, s):
         numres = self._num_reserved_ids
         if six.PY2:
-            if isinstance(s, unicode):
+            if isinstance(s, str):
                 s = s.encode("utf-8")
             return [ord(c) + numres for c in s]
         # Python3: explicitly convert to UTF-8
