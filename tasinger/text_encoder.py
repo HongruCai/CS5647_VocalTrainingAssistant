@@ -1,6 +1,6 @@
 import re
 import six
-from six.moves import range  # pylint: disable=redefined-builtin
+
 
 PAD = "<pad>"
 EOS = "<EOS>"
