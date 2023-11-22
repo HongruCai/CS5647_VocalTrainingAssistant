@@ -22,6 +22,7 @@ from basic_pitch import ICASSP_2022_MODEL_PATH
 matplotlib.rcParams['font.family'] = 'SimHei'
 basic_pitch_model = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
 
+
 '''use pitch basic to analyze the audio file and save the output to the output_dir'''
 def melody_analysis_and_save(file_list, output_dir):
     predict_and_save(
@@ -49,28 +50,76 @@ def note_to_midi(note):
 
 
 '''calculate the score of the user singing by comparing the standard and user singing notes in the same time interval'''
-def calculate_score(standard, user, threshold=3):
-    i = 0
-    score = 0
-    while i < standard[-1][-1]:
-        st = 0
-        for note1 in standard:
-            if note1[1] <= i <= note1[2]:
-                st = note1[0]
-                break
-        if st == 0:
-            score += 1
+def calculate_score(standard, user, threshold=3, score_mode="Reference Pitch"):
+    if score_mode == "Reference Pitch":
+        i = 0
+        score = 0
+        rec = 0
+        while i < standard[-1][-1]:
+            st = 0
+            for note1 in standard:
+                if note1[1] <= i <= note1[2]:
+                    st = note1[0]
+                    break
+            if st == 0:
+                score += 1
+                rec += 1
+                i += 0.00001
+                continue
+            us = 0
+            for note2 in user:
+                if note2[1] <= i <= note2[2]:
+                    us = note2[0]
+                    break
+            if st + threshold >= us >= st - threshold:
+                score += 1
             i += 0.00001
-            continue
-        us = 0
-        for note2 in user:
-            if note2[1] <= i <= note2[2]:
-                us = note2[0]
-                break
-        if st + threshold >= us >= st - threshold:
-            score += 1
-        i += 0.00001
-    return score / (standard[-1][-1] / 0.00001)
+        return score / (standard[-1][-1] / 0.00001 - rec)
+    else:
+        i = 0
+        rec = []
+        rec1 = 0
+        while i < standard[-1][-1]:
+            st = 0
+            for note1 in standard:
+                if note1[1] <= i <= note1[2]:
+                    st = note1[0]
+                    break
+            if st == 0:
+                i += 0.00001
+                rec1 += 1
+                continue
+            us = 0
+            for note2 in user:
+                if note2[1] <= i <= note2[2]:
+                    us = note2[0]
+                    break
+            rec.append(st - us)
+            i += 0.00001
+        mean = np.mean(rec) / (standard[-1][-1] / 0.00001 - rec1)
+        i = 0
+        score = 0
+        rec = 0
+        while i < standard[-1][-1]:
+            st = 0
+            for note1 in standard:
+                if note1[1] <= i <= note1[2]:
+                    st = note1[0]
+                    break
+            if st == 0:
+                score += 1
+                rec += 1
+                i += 0.00001
+                continue
+            us = 0
+            for note2 in user:
+                if note2[1] <= i <= note2[2]:
+                    us = note2[0]
+                    break
+            if st + threshold >= us + mean >= st - threshold:
+                score += 1
+            i += 0.00001
+        return score / (standard[-1][-1] / 0.00001 - rec)
 
 
 '''convert the standard music sheet to the format of (pitch, start_time, end_time)'''
@@ -80,7 +129,7 @@ def convert_data(data):
     res2 = []
     for key, (lyric, pitches, durations) in data.items():
         rec1 = 0
-        count =0
+        count = 0
         for pitch, duration in zip(pitches, durations):
             start_time = current_time
             if count == 0:
@@ -121,7 +170,7 @@ def calculate_accuracy(sheet_music, user_singing, time_tolerance1, time_toleranc
 
 
 '''visualize the standard and user singing notes'''
-def visualize(stan,standard, user):
+def visualize(stan, standard, user):
     times = []
     pitches = []
     for pitch, start, end in user:
@@ -156,7 +205,7 @@ def visualize(stan,standard, user):
 
 
 '''main function to analyze the user singing, calculate the score and accuracy and visualize the result'''
-def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, threshold2, tolerance1, tolerance2):
+def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, threshold2, tolerance1, tolerance2, velocity_, score_mode):
     output_dir = 'resources/intermediate_files'
     melody_analysis_and_save([audio_file], output_dir)
 
@@ -185,6 +234,7 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
 
     '''extract the notes from the user's output file'''
     user_notes = []
+
     with open(notes_file[0], newline='') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
@@ -193,15 +243,19 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
             if row[0] == 'start_time_s':
                 continue
             velocity = float(row[3])
-            if velocity >= 40:
-                start_time_s = float(row[0])
-                end_time_s = float(row[1])
-                pitch_midi = int(row[2])
-                user_notes.append((pitch_midi, start_time_s, end_time_s))
+            start_time_s = float(row[0])
+            end_time_s = float(row[1])
+            pitch_midi = int(row[2])
+            user_notes.append((pitch_midi, start_time_s, end_time_s, velocity))
     user_notes = sorted(user_notes, key=lambda x: x[1])
-
+    mark = 0
+    for i in range(len(user_notes)):
+        if user_notes[i][3] >= velocity_:
+            mark = i
+            break
+    user_notes = user_notes[mark:]
     '''convert to same format'''
-    standard_notes,standard_lyrics = convert_data(standard)
+    standard_notes, standard_lyrics = convert_data(standard)
     user_start_time = user_notes[0][1]
     standard_start_time = standard_notes[0][2]
     for i in range(len(user_notes)):
@@ -209,15 +263,15 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
                          user_notes[i][2] - user_start_time + standard_start_time)
 
     '''calculate the score and accuracy'''
-    score = calculate_score(standard_notes, user_notes, threshold=threshold1)
+    score = calculate_score(standard_notes, user_notes, threshold=threshold1, score_mode=score_mode)
     score = round(score * 100, 2)
     pitch_accuracy, rhythm_accuracy, duration_accuracy = calculate_accuracy(standard_notes, user_notes, time_tolerance1=tolerance1,
                                                                             time_tolerance2=tolerance2,
                                                                             threshold=threshold2)
 
     '''visualize the result'''
-    visualizations = visualize(standard_lyrics,standard_notes, user_notes)
+    visualizations = visualize(standard_lyrics, standard_notes, user_notes)
 
     os.remove(notes_file[0])
-    return score, visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy, len(user_notes), round(user_notes[-1][2],2), len(
-        standard_notes), round(standard_notes[-1][2],2)
+    return score, visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy, len(user_notes), round(user_notes[-1][2], 2), len(
+        standard_notes), round(standard_notes[-1][2], 2)
