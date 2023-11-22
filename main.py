@@ -5,8 +5,6 @@ from tasinger.tasinger import TASinger
 tasinger = TASinger("m4singer_diff_e2e")
 
 '''main function to generate'''
-
-
 def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
     if mode == "Audio":
         audio = tasinger.singing(singer + "-1", sheet_text, sheet_note, sheet_duration)
@@ -17,8 +15,6 @@ def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
 
 
 '''main function to generate the reference video'''
-
-
 def generate_video(singer, sheet_text, sheet_note, sheet_duration):
     return "This is a test"
 
@@ -96,7 +92,7 @@ if __name__ == "__main__":
         singers = ['Tenor', 'Soprano', 'Bass', 'Alto']
         modes = ["Audio", "Video"]
 
-        gr.Label("🎵🎙 Reference Generation Module 🎶", show_label=False)
+        gr.Label("🎵 Reference Generation Module 🎶", show_label=False)
         '''reference generation parameters'''
         with gr.Row():
             drop1 = gr.Dropdown(label="Select a Singer", value=singers[0], choices=singers)

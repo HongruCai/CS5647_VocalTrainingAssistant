@@ -14,6 +14,7 @@ import matplotlib
 from io import BytesIO
 import librosa
 
+import numpy as np
 import tensorflow as tf
 from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
@@ -125,14 +126,16 @@ def visualize(stan,standard, user):
     pitches = []
     for pitch, start, end in user:
         times.extend([start, end])
-        pitches.extend([pitch, pitch])
+        # pitches.extend([pitch, pitch])
+        pitches.extend([pitch if pitch != 0 else np.nan, pitch if pitch != 0 else np.nan])
     times2 = []
     pitches2 = []
     for pitch, start, end in standard:
-        if pitch == 0:
-            continue
+        # if pitch == 0:
+        #     continue
         times2.extend([start, end])
-        pitches2.extend([pitch, pitch])
+        # pitches2.extend([pitch, pitch])
+        pitches2.extend([pitch if pitch != 0 else np.nan, pitch if pitch != 0 else np.nan])
     plt.figure(figsize=(8, 4))
     for lyric, start, end in stan:
         for pitch1, start1, end1 in standard:
@@ -142,8 +145,8 @@ def visualize(stan,standard, user):
                     break
                     # print(lyric, start, pitch1)
 
-    plt.plot(times, pitches, marker='o', color='red')
     plt.plot(times2, pitches2, marker='o', color='blue')
+    plt.plot(times, pitches, marker='o', color='red')
     plt.legend(['User Singing', 'Reference'])
     plt.xlabel('Time (s)')
     plt.ylabel('Pitch (MIDI)')
@@ -157,6 +160,7 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
     output_dir = 'resources/intermediate_files'
     melody_analysis_and_save([audio_file], output_dir)
 
+    '''extract the notes from the music sheet'''
     notes_file = glob.glob(output_dir + "/*pitch.csv")
     text = sheet_text
     pro_text = []
@@ -179,6 +183,7 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
         standard[i] = (char, note_to_midi(note[i].split(' ')) if note[i] != 'rest' else [0], duration[i].split(" "))
     # print(standard)
 
+    '''extract the notes from the user's output file'''
     user_notes = []
     with open(notes_file[0], newline='') as csvfile:
         reader = csv.reader(csvfile)
@@ -187,25 +192,32 @@ def analyze(audio_file, sheet_text, sheet_note, sheet_duration, threshold1, thre
                 continue
             if row[0] == 'start_time_s':
                 continue
-            start_time_s = float(row[0])
-            end_time_s = float(row[1])
-            pitch_midi = int(row[2])
-            user_notes.append((pitch_midi, start_time_s, end_time_s))
+            velocity = float(row[3])
+            if velocity >= 40:
+                start_time_s = float(row[0])
+                end_time_s = float(row[1])
+                pitch_midi = int(row[2])
+                user_notes.append((pitch_midi, start_time_s, end_time_s))
     user_notes = sorted(user_notes, key=lambda x: x[1])
 
+    '''convert to same format'''
     standard_notes,standard_lyrics = convert_data(standard)
     user_start_time = user_notes[0][1]
     standard_start_time = standard_notes[0][2]
     for i in range(len(user_notes)):
         user_notes[i] = (user_notes[i][0], user_notes[i][1] - user_start_time + standard_start_time,
                          user_notes[i][2] - user_start_time + standard_start_time)
+
+    '''calculate the score and accuracy'''
     score = calculate_score(standard_notes, user_notes, threshold=threshold1)
     score = round(score * 100, 2)
-    visualizations = visualize(standard_lyrics,standard_notes, user_notes)
-
     pitch_accuracy, rhythm_accuracy, duration_accuracy = calculate_accuracy(standard_notes, user_notes, time_tolerance1=tolerance1,
                                                                             time_tolerance2=tolerance2,
                                                                             threshold=threshold2)
+
+    '''visualize the result'''
+    visualizations = visualize(standard_lyrics,standard_notes, user_notes)
+
     os.remove(notes_file[0])
     return score, visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy, len(user_notes), round(user_notes[-1][2],2), len(
         standard_notes), round(standard_notes[-1][2],2)
