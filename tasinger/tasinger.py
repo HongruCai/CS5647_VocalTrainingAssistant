@@ -1,23 +1,26 @@
 import re
-from utils.hparams import set_hparams
-from utils.hparams import hparams as hp
-import numpy as np
-import os
 import torch
 import numpy as np
-from modules.hifigan.hifigan import HifiGanGenerator
-
-from utils import load_ckpt
-from utils.hparams import set_hparams, hparams
-from utils.text_encoder import TokenTextEncoder
-from pypinyin import lazy_pinyin
-import librosa
 import glob
+import librosa
 
-from tasinger.diff.shallow_diffusion_tts import GaussianDiffusion
-from tasinger.diffsinger_task import DIFF_DECODERS
-from modules.fastspeech.pe import PitchExtractor
-import utils
+from tasinger.utils import load_ckpt
+from tasinger.hparams import set_hparams, hparams
+from tasinger.text_encoder import TokenTextEncoder
+from pypinyin import lazy_pinyin
+
+from tasinger.diffusion import GaussianDiffusion
+from tasinger.decoder import FFT, DiffNet
+from tasinger.fastspeech.pe import PitchExtractor
+from tasinger.hifigan import HifiGanGenerator
+
+
+DIFF_DECODERS = {
+    'wavenet': lambda hparams: DiffNet(hparams['audio_num_mel_bins']),
+    'fft': lambda hparams: FFT(
+        hparams['hidden_size'], hparams['dec_layers'], hparams['dec_ffn_kernel_size'], hparams['num_heads']),
+}
+
 
 def pinyin2ph_func():
     pinyin2phs = {'AP': '<AP>', 'SP': '<SP>'}
@@ -28,12 +31,12 @@ def pinyin2ph_func():
     return pinyin2phs
 
 
-class E2EInfer:
-    def __init__(self, hparams, device=None):
-        if device is None:
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+class TASinger:
+    def __init__(self, exp_name):
+        self.exp_name = exp_name
+        set_hparams(config=f'checkpoints/{self.exp_name}/config.yaml', exp_name=self.exp_name, print_hparams=False)
         self.hparams = hparams
-        self.device = device
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         phone_list = ["<AP>", "<SP>", "a", "ai", "an", "ang", "ao", "b", "c", "ch", "d", "e", "ei", "en", "eng", "er", "f", "g", "h",
          "i", "ia", "ian", "iang", "iao", "ie", "in", "ing", "iong", "iou", "j", "k", "l", "m", "n", "o", "ong", "ou",
@@ -55,18 +58,20 @@ class E2EInfer:
     def build_model(self):
         model = GaussianDiffusion(
             phone_encoder=self.ph_encoder,
-            out_dims=hparams['audio_num_mel_bins'], denoise_fn=DIFF_DECODERS[hparams['diff_decoder_type']](hparams),
+            out_dims=hparams['audio_num_mel_bins'],
+            denoise_fn=DIFF_DECODERS[hparams['diff_decoder_type']](hparams),
             timesteps=hparams['timesteps'],
             K_step=hparams['K_step'],
             loss_type=hparams['diff_loss_type'],
-            spec_min=hparams['spec_min'], spec_max=hparams['spec_max'],
+            spec_min=hparams['spec_min'],
+            spec_max=hparams['spec_max'],
         )
         model.eval()
         load_ckpt(model, hparams['work_dir'], 'model')
 
         if hparams.get('pe_enable') is not None and hparams['pe_enable']:
             self.pe = PitchExtractor().to(self.device)
-            utils.load_ckpt(self.pe, hparams['pe_ckpt'], 'model', strict=True)
+            load_ckpt(self.pe, hparams['pe_ckpt'], 'model', strict=True)
             self.pe.eval()
         return model
 
@@ -274,23 +279,6 @@ class E2EInfer:
         output = self.postprocess_output(output)
         return output
 
-    @classmethod
-    def example_run(cls, inp):
-        from utils.audio import save_wav
-        set_hparams(print_hparams=False)
-        infer_ins = cls(hparams)
-        out = infer_ins.infer_once(inp)
-        os.makedirs('infer_out', exist_ok=True)
-        f_name = inp['spk_name'] + ' | ' + inp['text']
-        save_wav(out, f'infer_out/{f_name}.wav', hparams['audio_sample_rate'])
-
-
-class TASinger:
-    def __init__(self, exp_name):
-        self.exp_name = exp_name
-        set_hparams(config=f'checkpoints/{self.exp_name}/config.yaml', exp_name=self.exp_name, print_hparams=False)
-        self.infer_ins = E2EInfer(hp)
-
     def singing(self, singer, text, notes, notes_duration):
         PUNCS = '。？；：'
         sents = re.split(rf'([{PUNCS}])', text.replace('\n', ','))
@@ -310,7 +298,7 @@ class TASinger:
                 n += sents_notes[i] + sents_notes[i+1]
                 n_dur += sents_notes_dur[i] + sents_notes_dur[i+1]
             if len(s) >= 400 or (i >= len(sents) - 2 and len(s) > 0):
-                audio_out = self.infer_ins.infer_once({
+                audio_out = self.infer_once({
                     'spk_name': singer,
                     'text': s,
                     'notes': n,
@@ -319,8 +307,8 @@ class TASinger:
                 audio_out = audio_out * 32767
                 audio_out = audio_out.astype(np.int16)
                 audio_outs.append(audio_out)
-                audio_outs.append(np.zeros(int(hp['audio_sample_rate'] * 0.3)).astype(np.int16))
+                audio_outs.append(np.zeros(int(hparams['audio_sample_rate'] * 0.3)).astype(np.int16))
                 s = ""
                 n = ""
         audio_outs = np.concatenate(audio_outs)
-        return hp['audio_sample_rate'], audio_outs
+        return hparams['audio_sample_rate'], audio_outs
