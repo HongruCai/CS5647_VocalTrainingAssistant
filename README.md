@@ -21,8 +21,8 @@ features for analyzing user singing performance and generating reference audio o
 
     
 - Reference Generation Module![gen.png](assets%2Fgen.png)
-  - TODO
-  - TODO
+  - Generate downloadable synthesized singing voice based on input music sheet.
+  - Generate downloadable video which combines visualization of input music sheet and synthesized singing voice.
 
 ## Features
 
@@ -75,4 +75,5 @@ This project uses the following tools or repositories:
 * [gradio-app](https://www.gradio.app/)
 * [basic-pitch](https://github.com/spotify/basic-pitch)
 * [m4singer](https://github.com/M4Singer/M4Singer)
-* TODO
+* [matplotlib](https://github.com/matplotlib/matplotlib)
+* [moviepy](https://github.com/Zulko/moviepy)
