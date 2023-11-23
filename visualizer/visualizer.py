@@ -83,10 +83,10 @@ def generate_video(audio, input_text, input_note, input_duration):
     ax.set_yticks(range(len(note_order)))
     ax.set_yticklabels(note_order)
 
-    plt.savefig('piano_roll.png', dpi=dpi)  # Adjust the DPI for better quality
+    plt.savefig('resources/intermediate_files/image.png', dpi=dpi)  # Adjust the DPI for better quality
 
     # Load the image
-    img_clip = ImageClip('piano_roll.png')
+    img_clip = ImageClip('resources/intermediate_files/image.png')
 
     # Set the duration of the image clip
     img_clip = img_clip.set_duration(total_duration)
@@ -106,15 +106,15 @@ def generate_video(audio, input_text, input_note, input_duration):
     video = CompositeVideoClip([img_clip, bar_clip])
     
     # Create an audio clip from the wav array
-    write('audio.wav', audio[0], audio[1])
-    audio = AudioFileClip('audio.wav')
+    write('resources/intermediate_files/audio.wav', audio[0], audio[1])
+    audio = AudioFileClip('resources/intermediate_files/audio.wav')
 
     # Set the audio of the video clip
     video = video.set_audio(audio)
 
     # Get the binary representation of the video
-    video.write_videofile("output.mp4", fps=24, audio_codec='aac')
+    video.write_videofile('resources/intermediate_files/video.mp4', fps=24, audio_codec='aac')
 
-    return "output.mp4"
+    return 'resources/intermediate_files/video.mp4'
 
 
