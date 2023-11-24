@@ -16,7 +16,6 @@ def generate(sheet_text, sheet_note, sheet_duration, singer, mode):
         return None, video
 
 
-
 if __name__ == "__main__":
     '''examples for testing and for users to start with'''
     examples = [
@@ -86,7 +85,8 @@ if __name__ == "__main__":
         with gr.Row():
             c1 = gr.ClearButton(scale=1, value="Clear Input", components=[audio_file, sheet_text, sheet_note, sheet_duration])
             c2 = gr.ClearButton(scale=1, value="Clear Analysis",
-                                components=[score, ana_visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy])
+                                components=[score, ana_visualizations, pitch_accuracy, rhythm_accuracy, duration_accuracy,user_total_notes,
+                                            user_total_duration,reference_total_notes,reference_total_duration])
             b1 = gr.Button(scale=1, value="Analyze My Audio")
 
         '''reference generation'''''
